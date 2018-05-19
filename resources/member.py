@@ -10,21 +10,27 @@ class Member(Resource):
 
         if member:
             print(member.json())
+            return member.json()
         else:
             print({'message': 'Member not found'}, 404)
+            return {'message': 'Member not found'}, 404
 
-    def post(self, uuid):
+    def post(self, uuid=None):
 
         if MemberModel.find_by_uuid(uuid):
             print({
                 'error': 'Member with that uuid `{}` already exists'.format(uuid)
             }, 400)
+            return {
+                'error': 'Member with that uuid `{}` already exists'.format(uuid)
+            }, 400
 
         member = MemberModel(uuid)
 
         member.save_to_db()
 
         print(member.json(), 201)
+        return member.json(), 201
 
     def delete(self, uuid):
         member = MemberModel.find_by_uuid(uuid)
@@ -33,3 +39,4 @@ class Member(Resource):
             member.delete_from_db()
 
         print({'message': '{} Member Deleted'.format(uuid)})
+        return {'message': '{} Member Deleted'.format(uuid)}
