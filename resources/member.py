@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_restful import Resource
 
 from models.member import MemberModel
@@ -9,6 +10,18 @@ class Member(Resource):
         member = MemberModel.find_by_uuid(uuid)
 
         if member:
+            now = datetime.now()
+
+            # Check if valid
+            days_since_created = (now - member.created).days
+
+            if (days_since_created > 90):
+                print({'message': 'Created over 90 days ago', 'days': days_since_created})
+                return {'message': 'Created over 90 days ago', 'days': days_since_created}, 405
+
+            member.last_update = now
+            member.save_to_db()
+
             print(member.json())
             return member.json()
         else:
@@ -25,7 +38,8 @@ class Member(Resource):
                 'error': 'Member with that uuid `{}` already exists'.format(uuid)
             }, 400
 
-        member = MemberModel(uuid)
+        created_date = datetime.now()
+        member = MemberModel(uuid, created_date, created_date)
 
         member.save_to_db()
 
