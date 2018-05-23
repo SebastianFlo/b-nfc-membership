@@ -12,6 +12,7 @@ app.secret_key = os.environ['BBDBPASS']
 api = Api(app)
 
 port = 5000
+host = '0.0.0.0'
 
 api.add_resource(Member, '/member/<string:uuid>')
 
@@ -22,4 +23,4 @@ if __name__ == '__main__':
     with app.test_request_context():
         db.create_all()
 
-    app.run(port=port, debug=True)
+    app.run(host=host, port=port, debug=True)
