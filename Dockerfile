@@ -1,7 +1,6 @@
 FROM python:3.6
 
-ADD code /
-
+ADD . /
 # ENV BBDBPASS=**TO SET**
 
 RUN apt-get update && pip install -r requirements.txt

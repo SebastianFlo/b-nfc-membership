@@ -6,7 +6,8 @@ from flask_restful import Api
 from resources.member import Member
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db' # local
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/db/data.db'  # prod
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.environ['BBDBPASS']
 api = Api(app)
