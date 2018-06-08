@@ -5,7 +5,6 @@ from models.member import MemberModel
 
 
 class Member(Resource):
-
     def get(self, uuid):
         member = MemberModel.find_by_uuid(uuid)
 
@@ -16,8 +15,14 @@ class Member(Resource):
             days_since_created = (now - member.created).days
 
             if (days_since_created > 90):
-                print({'message': 'Created over 90 days ago', 'days': days_since_created})
-                return {'message': 'Created over 90 days ago', 'days': days_since_created}, 405
+                print({
+                    'message': 'Created over 90 days ago',
+                    'days': days_since_created
+                })
+                return {
+                    'message': 'Created over 90 days ago',
+                    'days': days_since_created
+                }, 405
 
             member.last_update = now
             member.save_to_db()
@@ -32,10 +37,12 @@ class Member(Resource):
 
         if MemberModel.find_by_uuid(uuid):
             print({
-                'error': 'Member with that uuid `{}` already exists'.format(uuid)
+                'error':
+                'Member with that uuid `{}` already exists'.format(uuid)
             }, 400)
             return {
-                'error': 'Member with that uuid `{}` already exists'.format(uuid)
+                'error':
+                'Member with that uuid `{}` already exists'.format(uuid)
             }, 400
 
         created_date = datetime.now()
