@@ -3,3 +3,4 @@ data.db
 __pycache__/
 *.pyc
 app-env
+reader/node_modules
