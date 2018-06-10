@@ -22,12 +22,20 @@ SETUP:
 
 This installs docker and the nfc drivers and node
 
+Run the reader application using
+
+`pm2 start /reader/reader.js`
 To give permissions for the automatic starting of the reader run
 ```
 pm2 startup systemd
 ```
 
 Then run with root persmission the outputted command;
+
+Check logs using
+`pm2 logs reader`
+
+
 
 
 ### Create Docker Volume
