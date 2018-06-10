@@ -70,9 +70,9 @@ gpio.on('change', (channel, value) => {
         // if prev and current states are different
         if (buttonIdle !== value) {
             console.log('Button Active: ' + !value);
-            buttonIdle = value; // value is false if the circuit is closed
         }
     }
+    buttonIdle = value; // value is false if the circuit is closed
 });
 
 gpio.setup(7, gpio.DIR_IN, gpio.EDGE_BOTH);
