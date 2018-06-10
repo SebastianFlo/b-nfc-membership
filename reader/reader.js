@@ -97,6 +97,7 @@ nfc.on('reader', async reader => {
 
             memberRequest(card.uid, {
                 onSuccess: async() => {
+                    console.log(buttonIdle ? 'Checking' : 'Creating');
                     await reader.transmit(successLEDBlink, 40);
                 },
                 onNotFound: async () => {
