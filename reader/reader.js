@@ -63,13 +63,15 @@ const expiredLEDBlink = new Buffer([
 const nfc = new NFC(); // const nfc = new NFC(minilogger); // optionally you can pass logger to see internal debug logs
 
 let readers = [];
-let buttonPressed = false;
-
+let buttonIdle = true;
 
 gpio.on('change', (channel, value) => {
-    if (value === buttonPressed) {
-        console.log('Channel ' + channel + ' value is now ' + value);
-        buttonPressed === !value; // value is false if the circuit is closed
+    if (!value) {
+        // if prev and current states are different
+        if (buttonIdle !== value) {
+            console.log('Button Active: ' + !value);
+            buttonIdle = value; // value is false if the circuit is closed
+        }
     }
 });
 
