@@ -32,6 +32,7 @@ const memberCreate = function(uid, { onSuccess, onExistsAlready }) {
         // if member is not found
         if (member.error) {
             return onExistsAlready();
+        }
 
         return onSuccess();
     })

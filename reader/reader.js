@@ -109,7 +109,7 @@ nfc.on('reader', async reader => {
 			// const uid = card.uid;
             console.log(`card detected`, { reader: reader.name, uid: card.uid });
 
-            if (buttonIdle) {
+            if (!buttonIdle) {
                 memberCreate(card.uid, {
                     onSuccess: async() => {
                         console.log('Created: ', card.uid);
@@ -119,8 +119,7 @@ nfc.on('reader', async reader => {
                         console.log('Exists already: ',card.uid);
                         await reader.transmit(expiredLEDBlink, 40);
                     },
-                })
-
+                });
             } else {
                 memberRequest(card.uid, {
                     onSuccess: async() => {
@@ -139,11 +138,13 @@ nfc.on('reader', async reader => {
 		else if (card.type === TAG_ISO_14443_4) {
 			// process raw Buffer data
 			const data = card.data.toString('utf8');
-            console.log(`card detected`, { reader: reader.name, card: { ...card, data } });
+            console.log(`NOT SUPPORTED: card detected`, { reader: reader.name, card: { ...card, data } });
+            errorLED();
 		}
 		// not possible, just to be sure
 		else {
-			console.log(`card detected`, { reader: reader.name, card });
+            console.log(`NOT SUPPORTED: card detected`, { reader: reader.name, card });
+            errorLED();
 		}
 
     });
@@ -176,3 +177,7 @@ nfc.on('error', err => {
 	pretty.error(`an error occurred`, err);
 
 });
+
+async function errorLED () {
+    await await reader.transmit(notFoundLEDBlink, 40);
+}
