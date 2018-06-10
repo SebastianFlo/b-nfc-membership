@@ -9,7 +9,7 @@
 // #############
 
 const { NFC, TAG_ISO_14443_3, TAG_ISO_14443_4, KEY_TYPE_A, KEY_TYPE_B, CONNECT_MODE_DIRECT } = require('nfc-pcsc');
-const { memberRequest } = require('./member-request');
+const { memberRequest, memberCreate } = require('./member-request');
 const gpio = require('rpi-gpio');
 
 const baseLED = [
@@ -32,6 +32,13 @@ const successDataIn = [
     0x01  // Data In: Link to buzzer
 ];
 
+const createdDataIn = [
+    0x03, // T1 Duration
+    0x01, // T2 Duration
+    0x01, // Data In: Repetition
+    0x01  // Data In: Link to buzzer
+];
+
 const expiredDataIn = [
     0x01, // T1 Duration
     0x02, // T2 Duration
@@ -44,6 +51,13 @@ const notFoundLEDBlink = new Buffer([
     0x50, // P2: LED State Control
     0x04, // Lc
     ...notFoundDataIn
+]);
+
+const createdLEDBlink = new Buffer([
+    ...baseLED,
+    0x28, // P2: LED State Control
+    0x04, // Lc
+    ...createdDataIn
 ]);
 
 const successLEDBlink = new Buffer([
@@ -95,18 +109,31 @@ nfc.on('reader', async reader => {
 			// const uid = card.uid;
             console.log(`card detected`, { reader: reader.name, uid: card.uid });
 
-            memberRequest(card.uid, {
-                onSuccess: async() => {
-                    console.log(buttonIdle ? 'Checking' : 'Creating');
-                    await reader.transmit(successLEDBlink, 40);
-                },
-                onNotFound: async () => {
-                    await reader.transmit(notFoundLEDBlink, 40);
-                },
-                onExpired: async() => {
-                    await reader.transmit(expiredLEDBlink, 40);
-                }
-            });
+            if (buttonIdle) {
+                memberCreate(card.uid, {
+                    onSuccess: async() => {
+                        console.log('Created: ', card.uid);
+                        await reader.transmit(createdLEDBlink, 40);
+                    },
+                    onExistsAlready: async (error) => {
+                        console.log('Exists already: ',card.uid);
+                        await reader.transmit(expiredLEDBlink, 40);
+                    },
+                })
+
+            } else {
+                memberRequest(card.uid, {
+                    onSuccess: async() => {
+                        await reader.transmit(successLEDBlink, 40);
+                    },
+                    onNotFound: async () => {
+                        await reader.transmit(notFoundLEDBlink, 40);
+                    },
+                    onExpired: async() => {
+                        await reader.transmit(expiredLEDBlink, 40);
+                    }
+                });
+            }
 		}
 		// Android HCE
 		else if (card.type === TAG_ISO_14443_4) {

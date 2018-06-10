@@ -17,7 +17,25 @@ const memberRequest = function(uid, { onSuccess, onNotFound, onExpired }) {
         }
 
         return onSuccess();
+    });
+}
+
+const memberCreate = function(uid, { onSuccess, onExistsAlready }) {
+    return request.post(`http://localhost:5000/member/${uid}`, (error, response, body) => {
+        if (error) {
+            return onExistsAlready();
+        }
+
+        console.log('Server Response: ', body);
+        const member = JSON.parse(body);
+
+        // if member is not found
+        if (member.error) {
+            return onExistsAlready();
+
+        return onSuccess();
     })
 }
 
 module.exports.memberRequest = memberRequest;
+module.exports.memberCreate = memberCreate;
