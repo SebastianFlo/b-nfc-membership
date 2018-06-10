@@ -67,7 +67,7 @@ nfc.on('reader', async reader => {
 
 	console.log(`device attached`, { reader: reader.name });
 
-	readers.push(reader);
+	readers.push(reader);pm2 startup systemd
 
 	// needed for reading tags emulated with Android HCE AID
 	// see https://developer.android.com/guide/topics/connectivity/nfc/hce.html

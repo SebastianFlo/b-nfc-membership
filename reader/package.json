@@ -2,11 +2,11 @@
   "name": "b-nfc-membership-reader",
   "version": "1.0.0",
   "description": "NFC Reader",
-  "main": "index.js",
+  "main": "reader.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "debug": "node index.js"
+    "start": "node reader.js",
+    "debug": "node reader.js"
   },
   "repository": {
     "type": "git",

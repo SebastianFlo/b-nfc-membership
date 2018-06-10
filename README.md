@@ -17,7 +17,18 @@ sqlLite3
 SETUP:
 
 <!-- Run the raspberry pi setup script -->
-rpi/setup.sh
+`sudo sh setup.sh`
+
+
+This installs docker and the nfc drivers and node
+
+To give permissions for the automatic starting of the reader run
+```
+pm2 startup systemd
+```
+
+Then run with root persmission the outputted command;
+
 
 ### Create Docker Volume
 
@@ -47,5 +58,11 @@ Add BBDBPASS env;
 Interact with image
 `sudo docker exec -it #containerID#  bash`
 
+TODO: Add nfc reader into container
+
+The connection to the NFC reader runs as a node application on the rapsberry pi
+
+To see information from the app run
+``
 
 Sebastian Florian @SebFlorian
