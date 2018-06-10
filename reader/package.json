@@ -27,6 +27,7 @@
   "homepage": "https://github.com/SebastianFlo/b-nfc-membership#readme",
   "dependencies": {
     "nfc-pcsc": "^0.6.2",
-    "request": "^2.87.0"
+    "request": "^2.87.0",
+    "rpi-gpio": "^1.0.0"
   }
 }

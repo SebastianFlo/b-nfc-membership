@@ -40,3 +40,4 @@ sudo rm -rf node-v8.11.2-linux-armv7l.tar.gz
 # Install node app manager
 echo 'Installing node app manager'
 sudo npm install -g pm2
+

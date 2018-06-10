@@ -10,6 +10,7 @@
 
 const { NFC, TAG_ISO_14443_3, TAG_ISO_14443_4, KEY_TYPE_A, KEY_TYPE_B, CONNECT_MODE_DIRECT } = require('nfc-pcsc');
 const { memberRequest } = require('./member-request');
+const gpio = require('rpi-gpio');
 
 const baseLED = [
     0xFF, // Class
@@ -62,6 +63,17 @@ const expiredLEDBlink = new Buffer([
 const nfc = new NFC(); // const nfc = new NFC(minilogger); // optionally you can pass logger to see internal debug logs
 
 let readers = [];
+let buttonPressed = false;
+
+
+gpio.on('change', (channel, value) => {
+    if (value === buttonPressed) {
+        console.log('Channel ' + channel + ' value is now ' + value);
+        buttonPressed === !value; // value is false if the circuit is closed
+    }
+});
+
+gpio.setup(7, gpio.DIR_IN, gpio.EDGE_BOTH);
 
 nfc.on('reader', async reader => {
 
