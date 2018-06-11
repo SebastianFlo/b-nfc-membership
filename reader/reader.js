@@ -9,75 +9,78 @@
 // #############
 
 const { NFC, TAG_ISO_14443_3, TAG_ISO_14443_4, KEY_TYPE_A, KEY_TYPE_B, CONNECT_MODE_DIRECT } = require('nfc-pcsc');
-const { memberRequest, memberCreate } = require('./member-request');
 const gpio = require('rpi-gpio');
 
-const baseLED = [
-    0xFF, // Class
-    0x00,    // INS
-    0x40, // P1
-];
+const { memberRequest, memberCreate } = require('./member-request');
+const { LED } = require('./modules/led');
 
-const notFoundDataIn = [
-    0x01, // T1 Duration
-    0x01, // T2 Duration
-    0x03, // Data In: Repetition
-    0x01  // Data In: Link to buzzer
-];
+// const baseLED = [
+//     0xFF, // Class
+//     0x00,    // INS
+//     0x40, // P1
+// ];
 
-const successDataIn = [
-    0x02, // T1 Duration
-    0x02, // T2 Duration
-    0x01, // Data In: Repetition
-    0x01  // Data In: Link to buzzer
-];
+// const notFoundDataIn = [
+//     0x01, // T1 Duration
+//     0x01, // T2 Duration
+//     0x03, // Data In: Repetition
+//     0x01  // Data In: Link to buzzer
+// ];
 
-const createdDataIn = [
-    0x03, // T1 Duration
-    0x01, // T2 Duration
-    0x01, // Data In: Repetition
-    0x01  // Data In: Link to buzzer
-];
+// const successDataIn = [
+//     0x02, // T1 Duration
+//     0x02, // T2 Duration
+//     0x01, // Data In: Repetition
+//     0x01  // Data In: Link to buzzer
+// ];
 
-const expiredDataIn = [
-    0x01, // T1 Duration
-    0x02, // T2 Duration
-    0x02, // Data In: Repetition
-    0x02  // Data In: Link to buzzer
-];
+// const createdDataIn = [
+//     0x03, // T1 Duration
+//     0x01, // T2 Duration
+//     0x01, // Data In: Repetition
+//     0x01  // Data In: Link to buzzer
+// ];
 
-const notFoundLEDBlink = new Buffer([
-    ...baseLED,
-    0x50, // P2: LED State Control
-    0x04, // Lc
-    ...notFoundDataIn
-]);
+// const expiredDataIn = [
+//     0x01, // T1 Duration
+//     0x02, // T2 Duration
+//     0x02, // Data In: Repetition
+//     0x02  // Data In: Link to buzzer
+// ];
 
-const createdLEDBlink = new Buffer([
-    ...baseLED,
-    0x28, // P2: LED State Control
-    0x04, // Lc
-    ...createdDataIn
-]);
+// const notFoundLEDBlink = new Buffer([
+//     ...baseLED,
+//     0x50, // P2: LED State Control
+//     0x04, // Lc
+//     ...notFoundDataIn
+// ]);
 
-const successLEDBlink = new Buffer([
-    ...baseLED,
-    0x28, // P2: LED State Control
-    0x04, // Lc
-    ...successDataIn
-]);
+// const createdLEDBlink = new Buffer([
+//     ...baseLED,
+//     0x28, // P2: LED State Control
+//     0x04, // Lc
+//     ...createdDataIn
+// ]);
 
-const expiredLEDBlink = new Buffer([
-    ...baseLED,
-    0x28, // P2: LED State Control
-    0x04, // Lc
-    ...expiredDataIn
-]);
+// const successLEDBlink = new Buffer([
+//     ...baseLED,
+//     0x28, // P2: LED State Control
+//     0x04, // Lc
+//     ...successDataIn
+// ]);
+
+// const expiredLEDBlink = new Buffer([
+//     ...baseLED,
+//     0x28, // P2: LED State Control
+//     0x04, // Lc
+//     ...expiredDataIn
+// ]);
 
 const nfc = new NFC(); // const nfc = new NFC(minilogger); // optionally you can pass logger to see internal debug logs
 
 let readers = [];
 let buttonIdle = true;
+let led = new LED();
 
 gpio.on('change', (channel, value) => {
     if (!value) {
