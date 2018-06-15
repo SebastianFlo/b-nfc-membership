@@ -14,74 +14,20 @@ const gpio = require('rpi-gpio');
 const { memberRequest, memberCreate } = require('./member-request');
 const { LED } = require('./modules/led');
 
-// const baseLED = [
-//     0xFF, // Class
-//     0x00,    // INS
-//     0x40, // P1
-// ];
-
-// const notFoundDataIn = [
-//     0x01, // T1 Duration
-//     0x01, // T2 Duration
-//     0x03, // Data In: Repetition
-//     0x01  // Data In: Link to buzzer
-// ];
-
-// const successDataIn = [
-//     0x02, // T1 Duration
-//     0x02, // T2 Duration
-//     0x01, // Data In: Repetition
-//     0x01  // Data In: Link to buzzer
-// ];
-
-// const createdDataIn = [
-//     0x03, // T1 Duration
-//     0x01, // T2 Duration
-//     0x01, // Data In: Repetition
-//     0x01  // Data In: Link to buzzer
-// ];
-
-// const expiredDataIn = [
-//     0x01, // T1 Duration
-//     0x02, // T2 Duration
-//     0x02, // Data In: Repetition
-//     0x02  // Data In: Link to buzzer
-// ];
-
-// const notFoundLEDBlink = new Buffer([
-//     ...baseLED,
-//     0x50, // P2: LED State Control
-//     0x04, // Lc
-//     ...notFoundDataIn
-// ]);
-
-// const createdLEDBlink = new Buffer([
-//     ...baseLED,
-//     0x28, // P2: LED State Control
-//     0x04, // Lc
-//     ...createdDataIn
-// ]);
-
-// const successLEDBlink = new Buffer([
-//     ...baseLED,
-//     0x28, // P2: LED State Control
-//     0x04, // Lc
-//     ...successDataIn
-// ]);
-
-// const expiredLEDBlink = new Buffer([
-//     ...baseLED,
-//     0x28, // P2: LED State Control
-//     0x04, // Lc
-//     ...expiredDataIn
-// ]);
-
 const nfc = new NFC(); // const nfc = new NFC(minilogger); // optionally you can pass logger to see internal debug logs
 
 let readers = [];
 let buttonIdle = true;
 let led = new LED();
 
+const leds = {
+    created: led.generateLEDBUZZ(3, 1, 1, 1),
+    read: led.generateLEDBUZZ(2, 2, 1, 1),
+    notFound: led.generateLEDBUZZ(1, 1, 3, 1),
+    error: led.generateLEDBUZZ(1, 2, 2, 2),
+}
+
+// Get button Press
 gpio.on('change', (channel, value) => {
     if (!value) {
         // if prev and current states are different
@@ -94,9 +40,10 @@ gpio.on('change', (channel, value) => {
 
 gpio.setup(7, gpio.DIR_IN, gpio.EDGE_BOTH);
 
+// Listen for Reader
 nfc.on('reader', async reader => {
 
-	console.log(`device attached`, { reader: reader.name });
+	console.log('device attached', { reader: reader.name });
 
 	readers.push(reader);
 
@@ -110,29 +57,29 @@ nfc.on('reader', async reader => {
 		// standard nfc tags like Mifare
 		if (card.type === TAG_ISO_14443_3) {
 			// const uid = card.uid;
-            console.log(`card detected`, { reader: reader.name, uid: card.uid });
+            console.log('card detected', { reader: reader.name, uid: card.uid });
 
             if (!buttonIdle) {
                 memberCreate(card.uid, {
                     onSuccess: async() => {
                         console.log('Created: ', card.uid);
-                        await reader.transmit(createdLEDBlink, 40);
+                        await reader.transmit(leds.created, 40);
                     },
                     onExistsAlready: async (error) => {
                         console.log('Exists already: ',card.uid);
-                        await reader.transmit(expiredLEDBlink, 40);
+                        await reader.transmit(leds.error, 40);
                     },
                 });
             } else {
                 memberRequest(card.uid, {
                     onSuccess: async() => {
-                        await reader.transmit(successLEDBlink, 40);
+                        await reader.transmit(leds.read, 40);
                     },
                     onNotFound: async () => {
-                        await reader.transmit(notFoundLEDBlink, 40);
+                        await reader.transmit(leds.notFound, 40);
                     },
                     onExpired: async() => {
-                        await reader.transmit(expiredLEDBlink, 40);
+                        await reader.transmit(leds.error, 40);
                     }
                 });
             }
@@ -141,30 +88,30 @@ nfc.on('reader', async reader => {
 		else if (card.type === TAG_ISO_14443_4) {
 			// process raw Buffer data
 			const data = card.data.toString('utf8');
-            console.log(`NOT SUPPORTED: card detected`, { reader: reader.name, card: { ...card, data } });
+            console.log('NOT SUPPORTED: card detected');
             errorLED();
 		}
 		// not possible, just to be sure
 		else {
-            console.log(`NOT SUPPORTED: card detected`, { reader: reader.name, card });
+            console.log('NOT SUPPORTED: card detected', { reader: reader.name, card });
             errorLED();
 		}
 
     });
 
     reader.on('card.off', async card => {
-        console.log(`${reader.reader.name}  card removed`, card.uid);
+        console.log('${reader.reader.name}  card removed', card.uid);
 	});
 
 	reader.on('error', err => {
 
-		console.error(`an error occurred`, { reader: reader.name, err });
+		console.error('an error occurred', { reader: reader.name, err });
 
 	});
 
 	reader.on('end', () => {
 
-		console.log(`device removed`, { reader: reader.name });
+		console.log('device removed', { reader: reader.name });
 
 		delete readers[readers.indexOf(reader)];
 
@@ -177,10 +124,10 @@ nfc.on('reader', async reader => {
 
 nfc.on('error', err => {
 
-	pretty.error(`an error occurred`, err);
+	console.log('an error occurred', err);
 
 });
 
 async function errorLED () {
-    await await reader.transmit(notFoundLEDBlink, 40);
+    await reader.transmit(leds.error, 40);
 }
