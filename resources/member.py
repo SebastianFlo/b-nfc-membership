@@ -35,15 +35,16 @@ class Member(Resource):
 
     def post(self, uuid=None):
 
-        if MemberModel.find_by_uuid(uuid):
-            print({
-                'error':
-                'Member with that uuid `{}` already exists'.format(uuid)
-            }, 400)
-            return {
-                'error':
-                'Member with that uuid `{}` already exists'.format(uuid)
-            }, 400
+        # Notice: For V1, registering an existing member will reset the card
+        # if MemberModel.find_by_uuid(uuid):
+        #     print({
+        #         'error':
+        #         'Member with that uuid `{}` already exists'.format(uuid)
+        #     }, 400)
+        #     return {
+        #         'error':
+        #         'Member with that uuid `{}` already exists'.format(uuid)
+        #     }, 400
 
         created_date = datetime.now()
         member = MemberModel(uuid, created_date, created_date)
@@ -52,6 +53,9 @@ class Member(Resource):
 
         print(member.json(), 201)
         return member.json(), 201
+
+    # TODO: Update method
+    # def put(self, uuid=None):
 
     def delete(self, uuid):
         member = MemberModel.find_by_uuid(uuid)
