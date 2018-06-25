@@ -11,7 +11,7 @@
 const { NFC, TAG_ISO_14443_3, TAG_ISO_14443_4, KEY_TYPE_A, KEY_TYPE_B, CONNECT_MODE_DIRECT } = require('nfc-pcsc');
 const gpio = require('rpi-gpio');
 
-const { memberRequest, memberCreate } = require('./member-request');
+const { memberRequest, memberCreate, memberUpdate } = require('./member-request');
 const { LED } = require('./modules/led');
 
 const nfc = new NFC(); // const nfc = new NFC(minilogger); // optionally you can pass logger to see internal debug logs
@@ -67,6 +67,15 @@ nfc.on('reader', async reader => {
                     },
                     onExistsAlready: async (error) => {
                         console.log('Exists already: ',card.uid);
+                        memberUpdate(card.uid, {
+                            onSuccess: async() => {
+                                console.log('Updated: ', card.uid);
+                                await reader.transmit(leds.created, 40);
+                            },
+                            onNotFound: async() => {
+                                await reader.transmit(leds.notFound, 40);
+                            }
+                        })
                         await reader.transmit(leds.error, 40);
                     },
                 });

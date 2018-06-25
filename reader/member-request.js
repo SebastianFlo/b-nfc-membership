@@ -37,6 +37,24 @@ const memberCreate = function(uid, { onSuccess, onExistsAlready }) {
         return onSuccess();
     })
 }
+const memberUpdate = function(uid, { onSuccess, onNotFound }) {
+    return request.put(`http://localhost:5000/member/${uid}`, (error, response, body) => {
+        if (error) {
+            return onNotFound();
+        }
+
+        console.log('Server Response: ', body);
+        const member = JSON.parse(body);
+
+        // if member is not found
+        if (member.error) {
+            return onNotFound();
+        }
+
+        return onSuccess();
+    })
+}
 
 module.exports.memberRequest = memberRequest;
 module.exports.memberCreate = memberCreate;
+module.exports.memberUpdate = memberUpdate;

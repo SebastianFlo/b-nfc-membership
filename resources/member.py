@@ -36,15 +36,16 @@ class Member(Resource):
     def post(self, uuid=None):
 
         # Notice: For V1, registering an existing member will reset the card
-        # if MemberModel.find_by_uuid(uuid):
-        #     print({
-        #         'error':
-        #         'Member with that uuid `{}` already exists'.format(uuid)
-        #     }, 400)
-        #     return {
-        #         'error':
-        #         'Member with that uuid `{}` already exists'.format(uuid)
-        #     }, 400
+        if MemberModel.find_by_uuid(uuid):
+            print({
+                'error':
+                'Member with that uuid `{}` already exists'.format(uuid)
+            }, 400)
+
+            return {
+                'error':
+                'Member with that uuid `{}` already exists'.format(uuid)
+            }, 400
 
         created_date = datetime.now()
         member = MemberModel(uuid, created_date, created_date)
@@ -55,7 +56,35 @@ class Member(Resource):
         return member.json(), 201
 
     # TODO: Update method
-    # def put(self, uuid=None):
+    def put(self, uuid=None):
+
+        # data = Item.parser.parse_args()
+
+        # item = ItemModel.find_by_name(name)
+
+        # if item is None:
+        #     item = ItemModel(name, **data)
+        # else:
+        #     item.price = data['price']
+        #     item.store_id = data['store_id']
+
+        # item.save_to_db()
+
+        # return item.json(), 201
+
+        currentMember = MemberModel.find_by_uuid(uuid)
+        if currentMember is None:
+            print({'message': 'Member not found'}, 404)
+            return {'message': 'Member not found'}, 404
+
+        created_date = datetime.now()
+        currentMember.created = created_date
+        currentMember.last_update = created_date
+
+        currentMember.save_to_db()
+
+        print(currentMember.json(), 201)
+        return currentMember.json(), 201
 
     def delete(self, uuid):
         member = MemberModel.find_by_uuid(uuid)
